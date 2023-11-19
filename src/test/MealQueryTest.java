@@ -21,10 +21,10 @@ import java.util.Map;
 public class MealQueryTest {
     public static void main(String[] args) throws SQLException { // demonstration code, delete before submission
         // query food
-        // IFoodMapper mapper = new FoodMapper();
+         IFoodMapper mapper = new FoodMapper();
 
         // traverse map to get unit nutrient value
-//        Map<Nutrient, Float> nutrientFloatMap = mapper.getUnitNutrientValue(2);
+        Map<Nutrient, Float> nutrientFloatMap = mapper.getUnitNutrientValue(2);
 //        for (Map.Entry<Nutrient, Float> entry : nutrientFloatMap.entrySet()) {
 //            String nutrientName = entry.getKey().getName();
 //            float nutrientValue = entry.getValue();
@@ -47,28 +47,31 @@ public class MealQueryTest {
 //        for (Map.Entry<Nutrient, Float> entry : res) {
 //            System.out.println(entry.getKey().getName() + ": " + entry.getValue() + "g");
 //        }
-
-        // get user
-        IUserMapper userMapper = new UserMapper();
+//
+//        // get user
+//        IUserMapper userMapper = new UserMapper();
         IMealMapper mealMapper = new MealMapper();
+//
+//        User user = userMapper.getUser("jd123");
+//        List<Meal> mealList = mealMapper.getByUser(user);
+//        System.out.println("\nThe user has " + mealList.size() + " meal records\n");
+//
+//        for (Meal meal : mealList) {
+//            Date date = meal.getDate();
+//            String type = meal.getType();
+//            System.out.println(user.getName() + " " + date + ", " + type);
+//            Map<Food, Float> map = meal.getFoodMap();
+//
+//            if (map.size() == 0) break;
+//            for (Map.Entry<Food, Float> entry : map.entrySet()) {
+//                food = entry.getKey();
+//                Float val = entry.getValue();
+//
+//                System.out.println(food + ": " + val + "g, " + food.getGroup());
+//            }
+//        }
 
-        User user = userMapper.getUser("jd123");
-        List<Meal> mealList = mealMapper.getByUser(user);
-        System.out.println("\nThe user has " + mealList.size() + " meal records\n");
-
-        for (Meal meal : mealList) {
-            Date date = meal.getDate();
-            String type = meal.getType();
-            System.out.println(user.getName() + " " + date + ", " + type);
-            Map<Food, Float> map = meal.getFoodMap();
-
-            if (map.size() == 0) break;
-            for (Map.Entry<Food, Float> entry : map.entrySet()) {
-                Food food = entry.getKey();
-                Float val = entry.getValue();
-
-                System.out.println(food + ": " + val + "g, " + food.getGroup());
-            }
-        }
+        Meal meal2 = mealMapper.getByID(1);
+        System.out.println(meal2);
     }
 }
