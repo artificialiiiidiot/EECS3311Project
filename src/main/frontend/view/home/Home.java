@@ -1,36 +1,77 @@
 package main.frontend.view.home;
 
+import main.backend.common.Result;
+import main.backend.meal.IMealController;
+import main.backend.meal.impl.MealController;
+import main.backend.user.entity.User;
 import main.frontend.common.Content;
+import main.frontend.common.ContentBuilder;
+import main.frontend.custom.entry.NfEntry;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Map;
 
 
 public class Home extends Content {
+    private Map<String, NfEntry> entries;
+    private Map<String, JButton> buttons;
+    private DefaultCategoryDataset dataSet;
+    private IMealController mealController = new MealController();
+
+    private ActionListener handleCalculate() {
+        return e -> {
+           entries.get("Fat Lose").setEntry("Under construction!");
+        };
+    }
+
+    private ActionListener handleReset() {
+        return e -> {
+            entries.get("Start Date").setEntry("");
+            entries.get("End Date").setEntry("");
+        };
+    }
+
+    private void renderLineChart() {
+        User user = instance.getUser();
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(14);
+
+        Result res = mealController.getCaloriesByDate(user, Date.valueOf(startDate), Date.valueOf(today));
+        if (res.getCode().equals("200")) {
+            Map<Date, Float> calorieIntake = (Map<Date, Float>) res.getData();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            for (Map.Entry<Date, Float> entry : calorieIntake.entrySet()) {
+                dataSet.addValue(entry.getValue(), "Calorie Intake", sdf.format(entry.getKey()));
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, res.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void mount() {
+        buttons.get("Reset").addActionListener(handleReset());
+        buttons.get("Calculate").addActionListener(handleCalculate());
+
+        renderLineChart();
+    }
+
     @Override
     public String showContent(JPanel content) {
-        content.removeAll();
+        ContentBuilder builder = new HomeBuilder(content);
+        HomeDirector director = new HomeDirector(builder);
+        director.constructPage("Welcome to Nutrifit");
 
-        content.setLayout(new GridBagLayout());
+        entries = ((HomeBuilder) builder).getEntries();
+        buttons = ((HomeBuilder) builder).getButtons();
+        dataSet = ((HomeBuilder) builder).getDataSet();
 
-        // set up button attributes
-        JLabel label = new JLabel("Welcome to Home Page"); // get login user info
-        label.setForeground(Color.BLACK);
-        label.setPreferredSize(new Dimension(200, 20));
-
-        // set up GridBagLayout
-        content.setLayout(new GridBagLayout());
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        // set up common constraints for buttons
-        gridBagConstraints.anchor = GridBagConstraints.NORTHWEST; // align: top left
-        gridBagConstraints.weightx = 1.0; // allocate horizontal space
-        gridBagConstraints.weighty = 1.0; // allocate vertical space
-        gridBagConstraints.insets = new Insets(5, 5, 5, 5); // component border
-
-        // add button to the first row and first column
-        gridBagConstraints.gridx = 0; // column 0
-        gridBagConstraints.gridy = 0; // row 0
-        content.add(label, gridBagConstraints);
+        mount();
 
         return "Switch to Home Page";
     }
