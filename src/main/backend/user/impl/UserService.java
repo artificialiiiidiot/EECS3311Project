@@ -3,7 +3,7 @@ package main.backend.user.impl;
 import main.backend.user.entity.User;
 import main.backend.user.IUserMapper;
 import main.backend.user.IUserService;
-import main.backend.user.validator.UserValidator;
+import main.backend.user.util.UserValidator;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -58,6 +58,7 @@ public class UserService implements IUserService {
         validateUser(user);
         userMapper.updateUser(user);
     }
+
     private void validateUser(User user) throws IllegalArgumentException { // change to validateUser in refactor stage
         UserValidator validator = new UserValidator(user);
         validator.validate();

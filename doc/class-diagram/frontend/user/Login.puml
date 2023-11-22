@@ -1,0 +1,60 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+class LoginDirector {
+    -builder: LoginBuilder
+
+    +LoginDirector(ContentBuilder)
+    +constructPage(String, ActionListener, ActionListener): void
+}
+
+abstract class ContentBuilder {
+    #page: JPanel
+    #constraints: GridBagConstraints
+    #gridy: int
+
+    +buildTitle(String): void
+    +buildMainContent(): void
+    +setUp(): void
+    +clearPage(): void
+}
+
+class LoginBuilder {
+    -entries: Map<String, NfEntry>
+    -constraints: GridBagConstraints
+    -gridy: int
+
+    -buildRegisterButton(ActionListener): void
+    -buildSubmitButton(ActionListener): void
+    +getFormData(): Map<String, NfEntry>
+}
+
+class LoginPage {
+    -pageName: String
+    -controller: IUserController
+    -entries: Map<String, NfEntry>
+    -registerPage: Content
+
+    -handleLogin(JPanel): ActionListener
+    -handleRegister(JPanel): ActionListener
+}
+
+abstract class Content {
+    #instance: UserSession
+    #frontEnd: WeakReference<IMainframe>
+
+    +setMainframe(IMainframe): void
+    +showContent(JPanel): String
+}
+
+interface IContent {
+  +showContent(JPanel): String
+}
+
+LoginDirector -right-> ContentBuilder
+LoginBuilder -left-|> ContentBuilder
+LoginPage -up-> LoginDirector
+LoginPage -up-> ContentBuilder
+Content <|-left-- LoginPage
+IContent <|.left. Content
+
+@enduml

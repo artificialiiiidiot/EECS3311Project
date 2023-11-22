@@ -1,63 +1,56 @@
 package main.backend.exercise.impl;
 
-import main.backend.exercise.ExerciseData;
+import main.backend.common.PeriodValidator;
 import main.backend.exercise.IExerciseMapper;
 import main.backend.exercise.IExerciseService;
 import main.backend.exercise.entity.Exercise;
-import main.backend.exercise.impl.ExerciseMapper;
+import main.backend.exercise.util.ExerciseValidator;
 import main.backend.user.entity.User;
 
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 
 public class ExerciseService implements IExerciseService {
     private IExerciseMapper exerciseMapper = new ExerciseMapper();
 
-//    public void saveExerciseData(Exercise data, User user) {
-//        int burnCalories = calBurnCalories(data, user);
-//        Exercise exercise = new Exercise(data.getDate(), data.getType(), data.getIntensity(), data.getDuration(), burnCalories);
-//        save(exercise, user);
-//    }
-
     @Override
-    public void save(Exercise exercise, User user) {
-        try {
-            int calories = calBurnCalories(exercise, user);
-            System.out.println("Burned: " + calories);
-            exercise.setBurnCalories(calories);
-            exerciseMapper.save(exercise, user);
-        } catch (SQLException e) {
-            throw new RuntimeException("Database error: Unable to save exercise.", e);
-        }
+    public void save(Exercise exercise, User user) throws SQLException, IllegalArgumentException {
+        ExerciseValidator validator = new ExerciseValidator(exercise);
+        validator.validate();
+
+        int calories = calBurnCalories(exercise, user);//calculate burned calories
+        System.out.println("Burned: " + calories);
+        exercise.setBurnCalories(calories); //set burned calories for exercise
+        exerciseMapper.save(exercise, user);
     }
 
     @Override
-    public void delete(int id) {
-        try {
-            exerciseMapper.delete(id);
-        } catch (SQLException e) {
-            throw new RuntimeException("Database error: Unable to delete exercise.", e);
-        }
+    public void delete(int id) throws SQLException {
+        exerciseMapper.delete(id);
     }
 
     @Override
-    public List<Exercise> getByUsername(String username) {
-        try {
-            return exerciseMapper.getByUsername(username);
-        } catch (SQLException e) {
-            throw new RuntimeException("Database error: Unable to retrieve exercises by username.", e);
-        }
+    public List<Exercise> getByUsername(String username) throws SQLException {
+        return exerciseMapper.getByUsername(username);
     }
 
     @Override
-    public List<Exercise> getByPeriod(String username, Date start, Date end) {
-        try {
-            return exerciseMapper.getByPeriod(username, start, end);
-        } catch (SQLException e) {
-            throw new RuntimeException("Database error: Unable to retrieve exercises by specific period.", e);
-        }
+    public List<Exercise> getByPeriod(String username, Date startDate, Date endDate) throws SQLException, IllegalArgumentException {
+        PeriodValidator validator = new PeriodValidator(startDate, endDate);
+        validator.validate();
+
+        return exerciseMapper.getByPeriod(username, startDate, endDate);
+    }
+
+    @Override
+    public Map<Date, Float> getCaloriesByDate(User user, Date startDate, Date endDate) throws SQLException, IllegalArgumentException {
+        PeriodValidator validator = new PeriodValidator(startDate, endDate);
+        validator.validate();
+
+        return exerciseMapper.getCaloriesByDate(user, startDate, endDate);
     }
 
     private int calBurnCalories(Exercise data, User user) {
@@ -81,7 +74,6 @@ public class ExerciseService implements IExerciseService {
 
     private Long calBMR(User user) {
         System.out.println("pass cal BMR");
-        //bmr计算似乎放在user中更合理一些
         long bmr;
         double weight = user.getWeight();
         double height = user.getHeight();
