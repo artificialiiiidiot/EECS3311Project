@@ -25,6 +25,12 @@ public class MealVisualPage extends Content {
     private Map<String, NfEntry> entries;
     private DefaultPieDataset pieDataset;
     private DefaultCategoryDataset radarDataSet;
+    private final String CFG_RECOMMEND = "CFG Recommendation";
+    private final Object[][] CFG_RECOMMENDATION = new Object[][]{
+            {50.0f, "Vegetables and Fruits"},
+            {25.0f, "Protein"},
+            {25.0f, "Whole Grain"}
+    };
 
     public MealVisualPage(Content recordPage) {
         this.recordPage = recordPage;
@@ -39,6 +45,9 @@ public class MealVisualPage extends Content {
     private ActionListener handleApply() {
         return e -> {
             if (!verifyEntries()) return;
+            pieDataset.clear(); // clear dataset
+            radarDataSet.clear(); // clear dataset
+
             Date startDate = Date.valueOf(entries.get("Start Date").getInput());
             Date endDate = Date.valueOf(entries.get("End Date").getInput());
 
@@ -106,6 +115,10 @@ public class MealVisualPage extends Content {
 
     private void renderRadarChart(Date startDate, Date endDate) {
         User user = instance.getUser();
+
+        for (Object[] data : CFG_RECOMMENDATION) {
+            radarDataSet.setValue((float) data[0], CFG_RECOMMEND, (String) data[1]);
+        }
 
         Result res = controller.getMealGroups(user, startDate, endDate);
         if (res.getCode().equals("200")) {

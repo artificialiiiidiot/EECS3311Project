@@ -6,6 +6,7 @@ import main.backend.exercise.IExerciseService;
 import main.backend.exercise.entity.Exercise;
 import main.backend.exercise.util.ExerciseValidator;
 import main.backend.user.entity.User;
+import main.backend.validator.impl.IdValidator;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -29,6 +30,8 @@ public class ExerciseService implements IExerciseService {
 
     @Override
     public void delete(int id) throws SQLException {
+        IdValidator validator = new IdValidator(id);
+        validator.validate();
         exerciseMapper.delete(id);
     }
 
@@ -51,6 +54,14 @@ public class ExerciseService implements IExerciseService {
         validator.validate();
 
         return exerciseMapper.getCaloriesByDate(user, startDate, endDate);
+    }
+
+    @Override
+    public Map<Date, Integer> getDailyExerciseMinutesByDate(User user, Date startDate, Date endDate) throws SQLException, IllegalArgumentException {
+        PeriodValidator validator = new PeriodValidator(startDate, endDate);
+        validator.validate();
+
+        return exerciseMapper.getDailyExerciseMinutesByDate(user, startDate, endDate);
     }
 
     private int calBurnCalories(Exercise data, User user) {
